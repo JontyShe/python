@@ -1,0 +1,27 @@
+# -*- coding: utf-8 -*-
+from selenium import webdriver
+from lxml import etree
+import pandas as pd
+def get():
+    driver = webdriver.Chrome()
+    driver.get(r'https://movie.douban.com/cinema/nowplaying/xian/')
+    html=driver.page_source
+    driver.close()
+    #整理文档对象
+    html = etree.HTML(html)
+    title = html.xpath('//*[@id="nowplaying"]//li/ul/li[2]/a/@title')
+    actor = html.xpath('//*[@id="nowplaying"]//li/@data-actors')
+    score = html.xpath('//*[@id="nowplaying"]//li/@data-score')
+    duration = html.xpath('//*[@id="nowplaying"]//li/@data-duration')
+    director = html.xpath('//*[@id="nowplaying"]//li/@data-director')
+
+    data=list(zip(title,score,director,actor,duration))
+    return data
+def saving(data):
+    df=pd.DataFrame(data=data,columns=['电影','评分','导演','主演','时长'])
+    df.to_csv('豆瓣最近上映.csv',encoding='gb18030')
+def main():
+    data=get()
+    saving(data)
+if __name__ == '__main__':
+    main()
